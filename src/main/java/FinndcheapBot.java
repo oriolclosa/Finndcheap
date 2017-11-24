@@ -1,6 +1,9 @@
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-public class MyAmazingBot extends TelegramLongPollingBot {
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+
+public class FinndcheapBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
 

@@ -1,6 +1,7 @@
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+
 public class Main {
     public static void main(String[] args) {
         // Initialize Api Context
@@ -11,7 +12,7 @@ public class Main {
 
         // Register our bot
         try {
-            botsApi.registerBot(new MyAmazingBot());
+            botsApi.registerBot(new FinndcheapBot());
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
