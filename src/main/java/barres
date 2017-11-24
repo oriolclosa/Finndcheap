@@ -1,0 +1,17 @@
+/start --> crea usuari, AMB VOLS ANTERIOS BUITS i amb informació seva treta de Facebook
+
+/search --> tot el que lusuari busqui aqui es desara a la base de dades per lusuari, perque al fer recomanacions es basi en aixo
+
+/fetch --> dels que tens pensats et recomani els vols
+
+/recomend --> basat en vols anteriors i info seva recomana vols, te en compre el temps amb la API weather a l'aeroport d'arribada (agafar dades d'altres vols),
+                agafa l
+
+--
+
+aeorport de sortida, aeroport d'arribada, dates, gustos, classe --> atributs d'una taula de vols antics
+
+
+
+
+
