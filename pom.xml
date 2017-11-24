@@ -8,12 +8,4 @@
     <artifactId>finndcheap</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.telegram</groupId>
-            <artifactId>telegrambots</artifactId>
-            <version>Latest</version>
-        </dependency>
-    </dependencies>
-
 </project>
