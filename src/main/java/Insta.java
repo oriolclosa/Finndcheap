@@ -13,7 +13,7 @@ public class Insta {
 
     //Insta api which will recive querys to search
     public ArrayList<ArrayList<String>> flyFrom(String sour, String dest, String dataexit, String dateto){
-        ArrayList<ArrayList<String>> flightsOut = null;
+        ArrayList<ArrayList<String>> flightsOut = new ArrayList<>();
         ArrayList<String> flight;
         String fdate;
         String fprice;
@@ -71,37 +71,23 @@ public class Insta {
                 JSONArray pricesList = jsonObject.getJSONArray("prices");
 
                 for (int i = 0; i < pricesList.length(); i++) {
-                    System.out.println(pricesList.length());
 
                     JSONObject data = pricesList.getJSONObject(i);
-                    System.out.println(data.toString());
-
 
                     fdate = data.getString("date");
-                    System.out.println(fdate);
-
-                    fprice = data.getString("price");
-                    System.out.println(fprice);
-
-
-                    fnoFlight = data.getString("noFlight");
-                    System.out.println(fnoFlight);
-
-
+                    fprice = data.getInt("price")+"";
+                    fnoFlight = data.getBoolean("noFlight")? "true" : "false";
                     flight = new ArrayList<>(Arrays.asList(fdate,fprice,fnoFlight));
 
                     flightsOut.add(flight);
-
-
                 }
             }
 
         }
         catch (Exception e){
+            System.out.println(e.toString());
             return null;
         }
-        System.out.println("hi");
-
         return flightsOut;
 
     }
