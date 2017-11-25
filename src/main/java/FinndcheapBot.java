@@ -8,6 +8,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mongodb.client.MongoCollection; import com.mongodb.client.MongoDatabase; import org.bson.Document; import org.json.JSONObject;
 
 import javax.print.Doc;
+import java.util.*;
 import java.util.logging.Level;
 
 import static java.lang.Math.toIntExact;
@@ -258,5 +259,43 @@ public class FinndcheapBot extends TelegramLongPollingBot {
     public String getBotToken() {
         // Return bot token from BotFather
         return "483875557:AAHc3q_N0G3jLhLR04B_EeVYgpui3ztPF8A";
+    }
+
+    public String mediana(List<String> ciutats){
+        Map<String, Integer> ciutat = new HashMap<>();
+        List<String> ci = new ArrayList<>();
+        String c;
+        for (int i = 0; i < ciutats.size(); ++i){
+            c = ciutats.get(i);
+            Integer count = ciutat.get(c);
+            if (count == null){
+                ciutat.put(c, 1);
+                ci.add(c);
+            }
+            else{
+                ciutat.put(c, ++count);
+            }
+        }
+
+        Iterator it = ciutat.entrySet().iterator();
+
+        String ciu = "no hi ha ciutats";
+        Integer num = null;
+
+        for (int i = 0; i < ci.size(); ++i){
+            String q = ci.get(i);
+            Integer w = ciutat.get(q);
+            if (ciu.equals("no hi ha ciutats")){
+                ciu = q;
+                num = w;
+            }
+            else {
+                if (num < w) {
+                    ciu = q;
+                    num = w;
+                }
+            }
+        }
+        return ciu;
     }
 }

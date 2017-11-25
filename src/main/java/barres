@@ -12,6 +12,6 @@
 aeorport de sortida, aeroport d'arribada, dates, gustos, classe --> atributs d'una taula de vols antics
 
 
-
+(Integer.parseInt(Character.toString(s.charAt(3))))
 
 
