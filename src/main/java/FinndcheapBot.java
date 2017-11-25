@@ -21,7 +21,7 @@ import static jdk.nashorn.internal.objects.NativeFunction.function;
 
 public class FinndcheapBot extends TelegramLongPollingBot {
 
-    public void alertWeather(int chat_id){
+    public void alertWeather(){
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
         MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
         MongoClient mongoClient = new MongoClient(connectionString);
@@ -32,6 +32,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         try{
             while(cursor.hasNext()){
                 Document actual = cursor.next();
+                int chat_id = actual.getInteger("chat_id");
                 if(actual.getBoolean("weather")){
                     MongoCollection<Document> collection2 = database.getCollection("flights");
                     FindIterable<Document> values2 = collection2.find(new Document());
@@ -46,11 +47,14 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                                 long diff = Math.abs(d1.getTime() - d2.getTime());
                                 long diffDays = diff / (24 * 60 * 60 * 1000);
                                 if ((diffDays>0)&&(diffDays < 6)) {
-                                    String plural = "days";
-                                    if(diffDays==1){
-                                        plural = "day";
+                                    if(actual2.getInteger("reminded")!=diffDays){
+                                        setVariable(actual2.getObjectId("_id").toString(), "flights","reminded", ""+diffDays);
+                                        String plural = "days";
+                                        if(diffDays==1){
+                                            plural = "day";
+                                        }
+                                        sendMessage(chat_id, "Warning for your flight to " + getName(actual2.getString("airD")) + " in " + diffDays + " " + plural + "! ☔");
                                     }
-                                    sendMessage(chat_id, "Warning for your flight to " + getName(actual2.getString("airD")) + " in " + diffDays + " " + plural + "! ☔");
                                 }
                             }
                         }
@@ -71,19 +75,24 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         return codi;
     }
 
-    private void setVariable(int user_id, String variable, String value){
+    private void setVariable(String user_id, String collect, String variable, String value){
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
         MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
         MongoClient mongoClient = new MongoClient(connectionString);
         MongoDatabase database = mongoClient.getDatabase("finndcheap");
-        MongoCollection<Document> collection = database.getCollection("users");
-        if(variable.equals("weather")){
-            if(value.equals("yes")){
-                collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("weather", true)));
-            }
-            else if(value.equals("no")){
-                System.out.println("no");
-                collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("weather", false)));
+        MongoCollection<Document> collection = database.getCollection(collect);
+        if(variable.equals("reminded")){
+            collection.updateOne(Document.parse("{_id: ObjectId(\"" + user_id + "\")}"), new Document("$set", new Document("reminded", Integer.parseInt(value))));
+        }
+        else {
+            int user_id2 = Integer.parseInt(user_id);
+            if (variable.equals("weather")) {
+                if (value.equals("yes")) {
+                    collection.updateOne(Document.parse("{_id: " + user_id2 + "}"), new Document("$set", new Document("weather", true)));
+                } else if (value.equals("no")) {
+                    System.out.println("no");
+                    collection.updateOne(Document.parse("{_id: " + user_id2 + "}"), new Document("$set", new Document("weather", false)));
+                }
             }
         }
     }
@@ -158,7 +167,8 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 .append("time", time)
                 .append("price", price)
                 .append("type", type)
-                .append("cabin", cabin);
+                .append("cabin", cabin)
+                .append("reminded", -1);
         collection.insertOne(doc);
         mongoClient.close();
     }
@@ -181,10 +191,6 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 sendMessage(chat_id, "Here is a list of commands!\n" +
                         "/get_weather (days)\n" +
                         "/settings");
-            }
-            else if(message_text.equals("/run_weather")){
-                Timer timer = new Timer();
-                timer.schedule(new AlertWeather(this, toIntExact(chat_id)), 0, 5000);
             }
             else if(message_text.equals("/add_flight")){
                 addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-26", (float)137.30, "adult", "economy");
@@ -233,24 +239,24 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 }
             }
             else if(message_text.equals("/settings_weather_yes")) {
-                setVariable(toIntExact(user_id),"weather", "yes");
+                setVariable(""+toIntExact(user_id),"users","weather", "yes");
                 sendMessage(chat_id, "You'll get bad weather notifications for your flights! \uD83D\uDE0E\n" +
                         "You can turn this off by typing /settings_weather_no.");
             }
             else if(message_text.equals("/settings_weather_no")) {
-                setVariable(toIntExact(user_id),"weather", "no");
+                setVariable(""+toIntExact(user_id),"users","weather", "no");
                 sendMessage(chat_id, "You won't get any bad weather notifications for your flights... \uD83D\uDE14\n" +
                         "You can turn this on by typing /settings_weather_yes.");
             }
             else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/settings_weather"))){
                 String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
                 if(opcio.equals("yes")){
-                    setVariable(toIntExact(user_id),"weather", "yes");
+                    setVariable(""+toIntExact(user_id),"users","weather", "yes");
                     sendMessage(chat_id, "You'll get bad weather notifications for your flights! \uD83D\uDE0E\n" +
                             "You can turn this off by typing /settings_weather_no.");
                 }
                 else if(opcio.equals("no")){
-                    setVariable(toIntExact(user_id),"weather", "no");
+                    setVariable(""+toIntExact(user_id),"users","weather", "no");
                     sendMessage(chat_id, "You won't get any bad weather notifications for your flights... \uD83D\uDE14\n" +
                             "You can turn this on by typing /settings_weather_yes.");
                 }
