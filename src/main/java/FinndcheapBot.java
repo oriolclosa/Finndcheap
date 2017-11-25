@@ -187,7 +187,6 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             mongoClient.close();
             System.out.println("User not exists in database. Written.");
             inicial =  "Welcome " + first_name + "! I'm Finndcheap, your easy-to-use flight assistant! ✈";
-            listCommands(toIntExact(chat_id));
         } else {
             System.out.println("User exists in database.");
             collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("chat_id", chat_id)));
@@ -267,6 +266,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
 
             if(message_text.equals("/start")){
                 sendMessage(chat_id, (check(toIntExact(user_id), toIntExact(chat_id), user_first_name, user_last_name, user_username)));
+                listCommands(toIntExact(chat_id));
             }
             else if(message_text.equals("/help")){
                 listCommands(toIntExact(chat_id));
@@ -300,7 +300,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                         valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
                     }
                 }
-                sendMessage(chat_id, "Our recomendation is... " + recomanacio + "! \uD83C\uDF1A");
+                sendMessage(chat_id, "Our recomendation is... " + recomanacio + " (" + recomanacio + ")! \uD83C\uDF1A");
                 sendMessage(chat_id, "Here you have the next flights.");
                 int mida=valors.size();
                 if(mida>5){
@@ -532,6 +532,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             }
 
         }
+        System.out.println("no trobat");
         return code;
     }
 }
