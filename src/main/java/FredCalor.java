@@ -27,7 +27,7 @@ public class FredCalor {
         double pluja = Double.parseDouble(Temps.get(4));
         double vent = Double.parseDouble(Temps.get(5));
         String direc = Temps.get(6);
-        String result = temperatura(tempMin, tempMax, vent) + ", also " + clouding(s, pluja);
+        String result = temperatura(tempMin, tempMax, vent) + ", also " + clouding(s, pluja) + ".";
         return result;
     }
 

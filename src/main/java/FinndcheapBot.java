@@ -210,12 +210,12 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             if (days < 0) {
                 for (int i = 0; i < 5; ++i) {
                     FredCalor temps2 = new FredCalor();
-                    sendMessage(chat_id, "Day " + i + "\n" +
+                    sendMessage(chat_id, convertDate(i) + "\n" +
                             temps2.FredOCalor(location, i));
                 }
             } else {
                 FredCalor temps2 = new FredCalor();
-                sendMessage(chat_id, "Day " + days + "\n" +
+                sendMessage(chat_id, convertDate(days) + "\n" +
                         temps2.FredOCalor(location, days));
             }
         }
@@ -245,7 +245,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
     private void listCommands(int chat_id){
         sendMessage(chat_id, "Here is a list of commands!\n" +
                 "/recommend\n" +
-                "/find (origin) [destination]\n" +
+                "/find (destination)\n" +
                 "/weather (days)\n" +
                 "/settings\n" +
                 "/help");
@@ -312,8 +312,25 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
 
             }
-            else if(message_text.equals("/find")){
-
+            else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/find"))){
+                String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
+                Insta insta = new Insta();
+                Date date = new Date(); // your date
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                int year = cal.get(Calendar.YEAR);
+                int month = cal.get(Calendar.MONTH);
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+                ArrayList<ArrayList<String>> valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "2017-11-30");
+                sendMessage(chat_id, "Those are the search results for " + /*ciutat(*/opcio/*)*/ + " (" + opcio + ")! \uD83C\uDF1A");
+                int mida=valors.size();
+                if(mida>5){
+                    mida = 5;
+                }
+                for(int i=0; i<mida; ++i){
+                    sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
+                }
+                sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
             }
             else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/weather"))){
                 String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
@@ -370,10 +387,6 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             else if (message_text.equals("Omae wa mou shindeiru")){
                 setVariable(""+toIntExact(user_id),"users","weather", "no");
                 sendMessage(chat_id, "NANI?");
-            }
-            else if (message_text.equals("Send nudes")){
-                setVariable(""+toIntExact(user_id),"users","weather", "no");
-                sendMessage(chat_id, "(.)(.)");
             }
             else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/settings_weather"))){
                 String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
@@ -479,19 +492,44 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         return ciu;
     }
 
-    public String intToDate(int merdaseca) {
-        switch (merdaseca) {
-            case 0:
-                return "The day before the day before the day before the day after the day after tomorrow";
-            case 1:
-                return "The day after today";
-            case 2:
-                return "The day after tomorrow";
-            case 3:
-                return "The day after the day after tomorrow";
-            default:
-                return null;
+    public String convertDate(int valor){
+        if(valor==0){
+            return "Today";
         }
+        else if(valor==1){
+            return "Tomorrow";
+        }
+        Date dat = new Date();
+        dat.setTime(dat.getTime()+(valor * 24 * 60 * 60 * 1000));
+        Calendar c = Calendar.getInstance();
+        c.setTime(dat);
+        String valor2="";
+        ArrayList<String> setmana2 = new ArrayList<>();
+        setmana2.add("");
+        setmana2.add("Sunday");
+        setmana2.add("Monday");
+        setmana2.add("Tuesday");
+        setmana2.add("Wednesday");
+        setmana2.add("Thursday");
+        setmana2.add("Friday");
+        setmana2.add("Saturday");
+        valor2 += setmana2.get(c.get(Calendar.DAY_OF_WEEK));
+        valor2 += " " + c.get(Calendar.DAY_OF_MONTH);
+        ArrayList<String> mesos2 = new ArrayList<>();
+        mesos2.add("January");
+        mesos2.add("February");
+        mesos2.add("March");
+        mesos2.add("April");
+        mesos2.add("May");
+        mesos2.add("June");
+        mesos2.add("July");
+        mesos2.add("August");
+        mesos2.add("September");
+        mesos2.add("October");
+        mesos2.add("November");
+        mesos2.add("December");
+        valor2 += " " + mesos2.get(c.get(Calendar.MONTH)) + ", " + c.get(Calendar.YEAR);
+        return valor2;
     }
 
     public String ciutat(String code){
