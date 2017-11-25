@@ -7,8 +7,6 @@ import java.util.Timer;
 public class Main {
     public static void main(String[] args) {
         // Initialize Api Context
-        Insta a = new Insta();
-        a.flyFrom("HEL","LPA","2017-12-12","10","ECONOMY1","true");
         //end of test  muniategui
         ApiContextInitializer.init();
 

@@ -9,6 +9,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mongodb.client.MongoCollection; import com.mongodb.client.MongoDatabase; import org.bson.Document; import org.json.JSONObject;
 
 import javax.print.Doc;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -186,7 +187,6 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             mongoClient.close();
             System.out.println("User not exists in database. Written.");
             inicial =  "Welcome " + first_name + "! I'm Finndcheap, your easy-to-use flight assistant! ✈";
-            listCommands(toIntExact(chat_id));
         } else {
             System.out.println("User exists in database.");
             collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("chat_id", chat_id)));
@@ -266,6 +266,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
 
             if(message_text.equals("/start")){
                 sendMessage(chat_id, (check(toIntExact(user_id), toIntExact(chat_id), user_first_name, user_last_name, user_username)));
+                listCommands(toIntExact(chat_id));
             }
             else if(message_text.equals("/help")){
                 listCommands(toIntExact(chat_id));
@@ -299,7 +300,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                         valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
                     }
                 }
-                sendMessage(chat_id, "Our recomendation is... " + recomanacio + "! \uD83C\uDF1A");
+                sendMessage(chat_id, "Our recomendation is... " + /*ciutat(*/recomanacio/*)*/ + " (" + recomanacio + ")! \uD83C\uDF1A");
                 sendMessage(chat_id, "Here you have the next flights.");
                 int mida=valors.size();
                 if(mida>5){
@@ -308,6 +309,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 for(int i=0; i<mida; ++i){
                     sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
                 }
+                sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
 
             }
             else if(message_text.equals("/find")){
@@ -490,5 +492,48 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             default:
                 return null;
         }
+    }
+
+    public String ciutat(String code){
+        String FILENAME = "/root/Telegram/airports_codes.txt";
+        File fileIn;
+        Scanner s;
+        try {
+            fileIn = new File(FILENAME);
+            s = new Scanner(fileIn);
+        }catch (Exception e){
+            System.out.println("No connecta");
+            fileIn = null;
+            s = null;
+        }
+
+        boolean trobat = false;
+
+        while(s.hasNext() && !trobat)
+        {
+            String linia = s.nextLine();
+            StringBuilder sb = new StringBuilder(3);
+            sb.append(linia.charAt(0));
+            sb.append(linia.charAt(1));
+            sb.append(linia.charAt(2));
+            String code2 = sb.toString();
+            if (code2.equals(code)){
+                trobat = true;
+                StringBuilder ciutatBuild = new StringBuilder();
+                boolean iscoma = false;
+                int i = 5;
+                while(!iscoma){
+                    if (linia.charAt(i) == ',') iscoma = true;
+                    else {
+                        ciutatBuild.append(linia.charAt(i));
+                        ++i;
+                    }
+                }
+                return ciutatBuild.toString();
+            }
+
+        }
+        System.out.println("no trobat");
+        return code;
     }
 }
