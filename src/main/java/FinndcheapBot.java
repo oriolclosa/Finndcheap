@@ -246,6 +246,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         sendMessage(chat_id, "Here is a list of commands!\n" +
                 "/recommend\n" +
                 "/find (destination)\n" +
+                "/flight\n" +
                 "/weather (days)\n" +
                 "/settings\n" +
                 "/help");
@@ -280,6 +281,18 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-07-10", (float)132.12, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-02-01", (float)165.70, "adult", "economy");
             }
+            else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/flight"))){
+                String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
+                if(opcio.length()==18) {
+                    String airD = opcio.substring(0, 3);
+                    String airA = opcio.substring(4, 7);
+                    String dat = opcio.substring(8, 18);
+                    addFlight(toIntExact(user_id), airD, airA, dat, (float) 1714, "adult", "economy");
+                }
+                else{
+                    sendError(toIntExact(chat_id));
+                }
+            }
             else if(message_text.equals("/recommend")){
                 Insta insta = new Insta();
                 Date date = new Date(); // your date
@@ -300,14 +313,14 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                         valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
                     }
                 }
-                sendMessage(chat_id, "Our recomendation is... " + /*ciutat(*/recomanacio/*)*/ + " (" + recomanacio + ")! \uD83C\uDF1A");
+                sendMessage(chat_id, "Our recomendation is... " + ciutat(recomanacio) + " (" + recomanacio + ")! \uD83C\uDF1A");
                 sendMessage(chat_id, "Here you have the next flights.");
                 int mida=valors.size();
                 if(mida>5){
                     mida = 5;
                 }
                 for(int i=0; i<mida; ++i){
-                    sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
+                    sendMessage(chat_id, convertDate(valors.get(i).get(0)) + " for " + valors.get(i).get(1) + "€.");
                 }
                 sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
 
@@ -321,15 +334,28 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 int year = cal.get(Calendar.YEAR);
                 int month = cal.get(Calendar.MONTH);
                 int day = cal.get(Calendar.DAY_OF_MONTH);
-                ArrayList<ArrayList<String>> valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "5");
-                sendMessage(chat_id, "Those are the search results for " + /*ciutat(*/opcio/*)*/ + " (" + opcio + ")! \uD83C\uDF1A");
-                int mida=valors.size();
-                if(mida>5){
-                    mida = 5;
+                ArrayList<ArrayList<String>> valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "3");
+                sendMessage(chat_id, "Those are the search results for " + ciutat(opcio) + " (" + opcio + ")! \uD83C\uDF1A");
+                if(valors.size()>0){
+                    sendMessage(chat_id, "Returning in 3 days for " + valors.get(0).get(1) + "€.");
                 }
-                for(int i=0; i<mida; ++i){
-                    sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
+                valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "4");
+                if(valors.size()>1){
+                    sendMessage(chat_id, "Returning in 4 days for " + valors.get(1).get(1) + "€.");
                 }
+                valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "5");
+                if(valors.size()>2){
+                    sendMessage(chat_id, "Returning in 5 days for " + valors.get(2).get(1) + "€.");
+                }
+                valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "6");
+                if(valors.size()>3){
+                    sendMessage(chat_id, "Returning in 6 days for " + valors.get(3).get(1) + "€.");
+                }
+                valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "7");
+                if(valors.size()>4){
+                    sendMessage(chat_id, "Returning in 7 days for " + valors.get(4).get(1) + "€.");
+                }
+                //TODO valors.get(i).get(1) >> valors.get(0).get(1)
                 sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
             }
             else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/weather"))){
@@ -490,6 +516,29 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             }
         }
         return ciu;
+    }
+
+    public String convertDate(String valor){
+        Date dat = null;
+        try {
+            dat = new SimpleDateFormat("yyyy-MM-dd").parse(valor);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar c = Calendar.getInstance();
+        c.setTime(dat);
+        String valor2="";
+        ArrayList<String> setmana2 = new ArrayList<>();
+        setmana2.add("");
+        setmana2.add("Sunday");
+        setmana2.add("Monday");
+        setmana2.add("Tuesday");
+        setmana2.add("Wednesday");
+        setmana2.add("Thursday");
+        setmana2.add("Friday");
+        setmana2.add("Saturday");
+        valor2 += setmana2.get(c.get(Calendar.DAY_OF_WEEK));
+        return valor2;
     }
 
     public String convertDate(int valor){
