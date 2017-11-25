@@ -25,7 +25,7 @@ public class Insta {
         boolean fixed = true;
         return flyFromCore(sour,dest,dataexit,dateto,fixed);
     }
-    public ArrayList<ArrayList<String>> flyFromCore(String sour, String dest, String dataexit, String dateto,boolean fixed){
+    private ArrayList<ArrayList<String>> flyFromCore(String sour, String dest, String dataexit, String dateto,boolean fixed){
 
 
         URIBuilder urireq = new URIBuilder();
