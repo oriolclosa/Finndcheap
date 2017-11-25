@@ -38,7 +38,7 @@ public class Insta {
         urireq.setHost("instantsearch-junction.ecom.finnair.com");
         if(fixed) urireq.setPath("/api/instantsearch/pricesforperiod/fixeddeparture");
         else urireq.setPath("/api/instantsearch/pricesforperiod");
-        //extra parameters
+        //extra parameters :3
         if (more.length!=0) {
             if (more.length>=1) {
                 if (more[0].equals("eco")) {
