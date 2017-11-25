@@ -9,29 +9,49 @@ public class Abbre {
 
     public static void main (String[] args){
         Abbre a = new Abbre();
-        a.ciutat();
+        Scanner s = new Scanner(System.in);
+        System.out.println(a.ciutat(s.nextLine()));
     }
 
-    public String ciutat(/*String code*/){
+    public String ciutat(String code){
         File fileIn;
         Scanner s;
         try {
             fileIn = new File(FILENAME);
-            System.out.println("ho fa1");
             s = new Scanner(fileIn);
-            System.out.println("ho fa");
         }catch (Exception e){
             System.out.println("No connecta");
             fileIn = null;
             s = null;
         }
 
-        while(s.hasNext())
-        {
-            System.out.println(s.nextLine());
-        }
+        boolean trobat = false;
 
-        return "a";
+        while(s.hasNext() && !trobat)
+        {
+            String linia = s.nextLine();
+            StringBuilder sb = new StringBuilder(3);
+            sb.append(linia.charAt(0));
+            sb.append(linia.charAt(1));
+            sb.append(linia.charAt(2));
+            String code2 = sb.toString();
+            if (code2.equals(code)){
+                trobat = true;
+                StringBuilder ciutatBuild = new StringBuilder();
+                boolean iscoma = false;
+                int i = 5;
+                while(!iscoma){
+                    if (linia.charAt(i) == ',') iscoma = true;
+                    else {
+                        ciutatBuild.append(linia.charAt(i));
+                        ++i;
+                    }
+                }
+                return ciutatBuild.toString();
+            }
+
+        }
+        return "no ha trobat";
     }
 
 }
