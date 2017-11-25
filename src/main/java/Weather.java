@@ -210,11 +210,5 @@ public class Weather {
         ArrayList<String> www = weatherDay("ALC", 4);
         for (int j = 0; j < www.size(); ++j) System.out.println(www.get(j));
             System.out.println("-------------------");
-
-        System.out.println(intToDate(0));
-        System.out.println(intToDate(1));
-        System.out.println(intToDate(2));
-        System.out.println(intToDate(3));
-        System.out.println(intToDate(4));
     }
 }
