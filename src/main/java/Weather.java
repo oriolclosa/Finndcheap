@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -182,9 +183,9 @@ public class Weather {
         for (int i = 0; i < a.size(); ++i) {
             ArrayList<ArrayList<String>> aa = a.get(i);
             for (int j = 0; j < aa.size(); ++j) {
-                ArrayList<String> aaa = aa.get(j);
-                for (int k = 0; k < aaa.size() ; ++k) {
-                    System.out.println(aaa.get(k));
+                ArrayList<String> tresa = aa.get(j);
+                for (int k = 0; k < tresa.size() ; ++k) {
+                    System.out.println(tresa.get(k));
                 }
                 System.out.println("-------------------");
             }
@@ -206,8 +207,14 @@ public class Weather {
         System.out.println("//////////////////////////////////");
 
 
-        ArrayList<String> www = weatherDay("BCN", 2);
+        ArrayList<String> www = weatherDay("ALC", 4);
         for (int j = 0; j < www.size(); ++j) System.out.println(www.get(j));
             System.out.println("-------------------");
+
+        System.out.println(intToDate(0));
+        System.out.println(intToDate(1));
+        System.out.println(intToDate(2));
+        System.out.println(intToDate(3));
+        System.out.println(intToDate(4));
     }
 }

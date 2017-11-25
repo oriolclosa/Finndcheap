@@ -465,7 +465,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
     public String intToDate(int merdaseca) {
         switch (merdaseca) {
             case 0:
-                return "The day before tomorrow";
+                return "The day before the day before the day before the day after the day after tomorrow";
             case 1:
                 return "The day after today";
             case 2:
