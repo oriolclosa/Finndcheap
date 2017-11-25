@@ -1,16 +1,39 @@
 import com.mongodb.DBCursor;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mongodb.client.MongoCollection; import com.mongodb.client.MongoDatabase; import org.bson.Document; import org.json.JSONObject;
 
+import javax.print.Doc;
 import java.util.logging.Level;
 
 import static java.lang.Math.toIntExact;
 import static jdk.nashorn.internal.objects.NativeFunction.function;
 
 public class FinndcheapBot extends TelegramLongPollingBot {
+
+    public void alertWeather(){
+        java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
+        MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
+        MongoClient mongoClient = new MongoClient(connectionString);
+        MongoDatabase database = mongoClient.getDatabase("finndcheap");
+        MongoCollection<Document> collection = database.getCollection("users");
+        FindIterable<Document> values = collection.find(new Document());
+        MongoCursor<Document> cursor = values.iterator();
+        try{
+            while(cursor.hasNext()){
+                if(cursor.next().getBoolean("weather")){
+                    System.out.println("CERT");
+                }
+            }
+        }
+        finally{
+            cursor.close();
+        }
+    }
 
     private void setVariable(int user_id, String variable, String value){
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
@@ -53,7 +76,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         }
     }
 
-    private String check(int user_id, String first_name, String last_name, String username) {
+    private String check(int user_id, int chat_id, String first_name, String last_name, String username) {
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
         MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
         MongoClient mongoClient = new MongoClient(connectionString);
@@ -65,6 +88,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         String inicial="";
         if (found == 0) {
             Document doc = new Document("_id", user_id)
+                    .append("chat_id", chat_id)
                     .append("username", username)
                     .append("first_name", first_name)
                     .append("last_name", last_name)
@@ -75,6 +99,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             inicial =  "Welcome " + first_name + "! I'm Finndcheap, your easy-to-use flight assistant! ✈";
         } else {
             System.out.println("User exists in database.");
+            collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("chat_id", chat_id)));
             mongoClient.close();
             inicial = "Welcome back " + first_name + "! ✈";
         }
@@ -83,6 +108,24 @@ public class FinndcheapBot extends TelegramLongPollingBot {
 
     private void getWeather(int chat_id, int days){
         sendMessage(chat_id, "Weather for " + days + "!");
+    }
+
+    private void addFlight(int user_id, String airD, String airA, String time, float price, String type, String cabin){
+        java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
+        MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
+        MongoClient mongoClient = new MongoClient(connectionString);
+        MongoDatabase database = mongoClient.getDatabase("finndcheap");
+        MongoCollection<Document> collection = database.getCollection("flights");
+        System.out.println("AFEGIT1");
+        Document doc = new Document("_id", Document.parse("{id: " + user_id + ", time: " + time + "}"))
+                .append("airD", airD)
+                .append("airA", airA)
+                .append("price", price)
+                .append("type", type)
+                .append("cabin", cabin);
+        collection.insertOne(doc);
+        mongoClient.close();
+        System.out.println("AFEGIT2");
     }
 
     @Override
@@ -99,7 +142,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             String user_username = update.getMessage().getChat().getUserName();
 
             if(message_text.equals("/start")){
-                sendMessage(chat_id, (check(toIntExact(user_id), user_first_name, user_last_name, user_username)));
+                sendMessage(chat_id, (check(toIntExact(user_id), toIntExact(chat_id), user_first_name, user_last_name, user_username)));
                 sendMessage(chat_id, "Here is a list of commands!\n" +
                         "/get_weather (days)\n" +
                         "/settings");
@@ -171,10 +214,21 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             else if((message_text.length()>0)&&(message_text.charAt(0)==('/'))){
                 sendMessage(chat_id, "I'm sorry, I don't understand this command... \uD83D\uDE30");
             }
+
+            //ONLY FOR DEVELOPMENT \/
+            else if(message_text.equals("/run_weather")){
+                alertWeather();
+            }
+            else if(message_text.equals("/add_flight")){
+                addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-25", (float)124.30, "adult", "economy");
+            }
+            //ONLY FOR DEVELOPMENT /\
+
             else{
-                System.out.println(message_text);
                 sendError(toIntExact(chat_id));
             }
+
+            System.out.println(message_text);
         }
     }
 
