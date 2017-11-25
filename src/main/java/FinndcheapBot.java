@@ -181,6 +181,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             mongoClient.close();
             System.out.println("User not exists in database. Written.");
             inicial =  "Welcome " + first_name + "! I'm Finndcheap, your easy-to-use flight assistant! ✈";
+            listCommands(toIntExact(chat_id));
         } else {
             System.out.println("User exists in database.");
             collection.updateOne(Document.parse("{_id: " + user_id + "}"), new Document("$set", new Document("chat_id", chat_id)));
@@ -190,8 +191,32 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         return inicial;
     }
 
-    private void getWeather(int chat_id, int days){
-        sendMessage(chat_id, "Weather for " + days + "!");
+    private void getWeather(int chat_id, String location, int days){
+        boolean existeix=false;
+        Weather temps = new Weather();
+        ArrayList<ArrayList<ArrayList<String>>> ciutats2 = temps.weatherAll();
+        int mida = ciutats2.size();
+        for(int i=0; i<mida; ++i){
+            if(ciutats2.get(i).get(0).get(0).equals(location)){
+                existeix = true;
+            }
+        }
+        if(existeix) {
+            if (days < 0) {
+                for (int i = 0; i < 5; ++i) {
+                    FredCalor temps2 = new FredCalor();
+                    sendMessage(chat_id, "Day " + i + "\n" +
+                            temps2.FredOCalor(location, i));
+                }
+            } else {
+                FredCalor temps2 = new FredCalor();
+                sendMessage(chat_id, "Day " + days + "\n" +
+                        temps2.FredOCalor(location, days));
+            }
+        }
+        else{
+            sendError(chat_id);
+        }
     }
 
     private void addFlight(int user_id, String airD, String airA, String time, float price, String type, String cabin){
@@ -212,6 +237,15 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         mongoClient.close();
     }
 
+    private void listCommands(int chat_id){
+        sendMessage(chat_id, "Here is a list of commands!\n" +
+                "/recommend\n" +
+                "/find (origin) [destination]\n" +
+                "/weather (days)\n" +
+                "/settings\n" +
+                "/help");
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
 
@@ -227,11 +261,9 @@ public class FinndcheapBot extends TelegramLongPollingBot {
 
             if(message_text.equals("/start")){
                 sendMessage(chat_id, (check(toIntExact(user_id), toIntExact(chat_id), user_first_name, user_last_name, user_username)));
-                sendMessage(chat_id, "Here is a list of commands!\n" +
-                        "/recommend\n" +
-                        "/find (origin) (destination)\n" +
-                        "/get_weather (days)\n" +
-                        "/settings");
+            }
+            else if(message_text.equals("/help")){
+                listCommands(toIntExact(chat_id));
             }
             else if(message_text.equals("/add_flight")){
                 addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-27", (float)137.30, "adult", "economy");
@@ -272,25 +304,29 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             else if(message_text.equals("/find")){
 
             }
-            else if(message_text.equals("/get_weather")){
-                getWeather(toIntExact(chat_id), 0);
-            }
-            else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/get_weather"))){
+            else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/weather"))){
                 String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
-                if(opcio.equals("1")) {
-                    getWeather(toIntExact(chat_id), 1);
-                }
-                else if(opcio.equals("2")) {
-                    getWeather(toIntExact(chat_id), 2);
-                }
-                else if(opcio.equals("3")) {
-                    getWeather(toIntExact(chat_id), 3);
-                }
-                else if(opcio.equals("4")) {
-                    getWeather(toIntExact(chat_id), 4);
+                if(opcio.contains(" ")) {
+                    System.out.println(opcio);
+                    String opcio2 = opcio.substring(0, opcio.indexOf(" "));
+                    String opcio3 = opcio.substring(opcio.indexOf(" ")+1, opcio.length());
+                    int valor=-1;
+                    if (opcio3.equals("0")) {
+                        valor = 0;
+                    }
+                    else if (opcio3.equals("1")) {
+                        valor = 1;
+                    } else if (opcio3.equals("2")) {
+                        valor = 2;
+                    } else if (opcio3.equals("3")) {
+                        valor = 3;
+                    } else if (opcio3.equals("4")) {
+                        valor = 4;
+                    }
+                    getWeather(toIntExact(chat_id), opcio2, valor);
                 }
                 else{
-                    sendError(toIntExact(chat_id));
+                    getWeather(toIntExact(chat_id), opcio, -1);
                 }
             }
             else if(message_text.equals("/settings")){
