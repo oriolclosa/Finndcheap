@@ -12,20 +12,25 @@ import java.util.Arrays;
 public class Insta {
    private ArrayList<ArrayList<String>> flightsOut = new ArrayList<>();
    private ArrayList<String> flight;
-   private String fdate;
-   private  String fprice;
-   private  String fnoFlight;
+   private String fdate="N/A";
+   private  String fprice="N/A";
+   private  String fnoFlight="N/A";
+   private String fflightNum = "N/A";
+   private String ffarBas = "N/A";
+    private String fflightNumret = "N/A";
+    private String ffarBasret = "N/A";
     //Insta api which will recive querys to search
 
-    public ArrayList<ArrayList<String>> flyFrom(String sour, String dest, String dataexit, String dateto) {
+    public ArrayList<ArrayList<String>> flyFrom(String sour, String dest, String dataexit, String dateto, String...more) {
         boolean fixed = false;
-        return flyFromCore(sour,dest,dataexit,dateto,fixed);
+        return flyFromCore(sour,dest,dataexit,dateto,fixed,more);
     }
     public ArrayList<ArrayList<String>> flyFromFixed(String sour, String dest, String dataexit, String dateto) {
         boolean fixed = true;
         return flyFromCore(sour,dest,dataexit,dateto,fixed);
     }
-    private ArrayList<ArrayList<String>> flyFromCore(String sour, String dest, String dataexit, String dateto,boolean fixed){
+    //extraparameters 0: eco or bus (for bussines type or for economical), 1: true or false;
+    private ArrayList<ArrayList<String>> flyFromCore(String sour, String dest, String dataexit, String dateto,boolean fixed,String...more){
 
 
         URIBuilder urireq = new URIBuilder();
@@ -33,10 +38,44 @@ public class Insta {
         urireq.setHost("instantsearch-junction.ecom.finnair.com");
         if(fixed) urireq.setPath("/api/instantsearch/pricesforperiod/fixeddeparture");
         else urireq.setPath("/api/instantsearch/pricesforperiod");
+        //extra parameters
+        if(!more[0].isEmpty()){
+            if (more[0].equals("eco")){
+                urireq.addParameter("cff","ECONOMY1");
+            }
+            else if (more[0].equals("bus")){
+                urireq.addParameter("cff","BUSINESS1");
+            }
+        }
+        if(!more[1].isEmpty()){
+            if(more[1].equals("true")){
+                urireq.addParameter("oneway","true");
+            }
+            else if(more[1].equals("false")){
+                urireq.addParameter("oneway","false");
+            }
+        }
+        if(!more[2].isEmpty()) {
+            if(Integer.parseInt(more[2])>=1 &&Integer.parseInt(more[2])<=30)
+                    urireq.addParameter("lengthOfStay",more[2]);
+        }
+        if(!more[3].isEmpty()) {
+            if(Integer.parseInt(more[3])>=0 &&Integer.parseInt(more[3])<=30)
+                urireq.addParameter("lengthOfStay",more[3]);
+        }
+        if(!more[4].isEmpty()){
+            if(more[4].equals("true")){
+                urireq.addParameter("debug","true");
+            }
+            else if(more[4].equals("false")){
+                urireq.addParameter("debug","false");
+            }
+        }
         urireq.addParameter("departureLocationCode",sour);
         urireq.addParameter("destinationLocationCode",dest);
         urireq.addParameter("startDate",dataexit);
         urireq.addParameter("numberOfDays",dateto);
+
         //debug
         System.out.println(urireq.toString());
         //debug-
@@ -71,16 +110,16 @@ public class Insta {
         String travels = content.toString();
 
 
-        return omaeWaMouShinderu(travels);
+        return omaeWaMouShinderu(travels,more);
 
     }
    // https://instantsearch-junction.ecom.finnair.com/api/instantsearch/pricesforperiod?departureLocationCode=HEL&destinationLocationCode=STO&startDate=2017-12-12&numberOfDays=10
-    private ArrayList<ArrayList<String>> omaeWaMouShinderu(String travels){
+    private ArrayList<ArrayList<String>> omaeWaMouShinderu(String travels,String...more){
         try{
             JSONObject jsonObject = new JSONObject(travels);
             if(jsonObject.has("level")){
                 System.out.println("CYKA BLyAT");
-                return null;
+                return new ArrayList<ArrayList<String >>();
             }
             if(jsonObject.has("currency")&&jsonObject.has("dep")&&jsonObject.has("dest")&&jsonObject.has("currency")&& jsonObject.has("prices")){
 
@@ -89,11 +128,50 @@ public class Insta {
                 for (int i = 0; i < pricesList.length(); i++) {
 
                     JSONObject data = pricesList.getJSONObject(i);
+                    if (!data.isNull("date")) {
+                        fdate = data.getString("date");
+                    }
+                    else fdate = "N/A";
 
-                    fdate = data.getString("date");
-                    fprice = data.getInt("price")+"";
+                    if (!data.isNull("price")) {
+                        fprice = data.getInt("price") + "";
+                    }
+                    else fprice = "N/A";
+
+
                     fnoFlight = data.getBoolean("noFlight")? "true" : "false";
-                    flight = new ArrayList<>(Arrays.asList(fdate,fprice,fnoFlight));
+
+                    if(data.has("departureDebugInfo")){
+                        JSONObject depar = new JSONObject("departureDebugInfo");
+                        if(depar.has("flightNumbers")){
+                            JSONArray fliNum = new JSONArray("flightNumbers");
+                            if(fliNum.length()!=0){
+                                fflightNum = fliNum.toString(0);
+                            }
+                        }
+                        if(depar.has("fareBasis")){
+                            JSONArray farBas = new JSONArray("fareBasis");
+                            if(farBas.length()!=0){
+                                ffarBas = farBas.toString(0);
+                            }
+                        }
+                    }
+                    if(data.has("returnDebugInfo")){
+                        JSONObject retur = new JSONObject("returnDebugInfo");
+                        if(retur.has("flightNumbers")){
+                            JSONArray fliNumret = new JSONArray("flightNumbers");
+                            if(fliNumret.length()!=0){
+                                fflightNumret = fliNumret.toString(0);
+                            }
+                        }
+                        if(retur.has("fareBasis")){
+                            JSONArray farBasret = new JSONArray("fareBasis");
+                            if(farBasret.length()!=0){
+                                ffarBasret = farBasret.toString(0);
+                            }
+                        }
+                    }
+                    flight = new ArrayList<>(Arrays.asList(fdate,fprice,fnoFlight,fflightNum,ffarBas,fflightNumret,fflightNumret));
 
                     flightsOut.add(flight);
                 }
@@ -102,7 +180,7 @@ public class Insta {
         }
         catch (Exception e){
             System.out.println(e.toString());
-            return null;
+            return new ArrayList<ArrayList<String >>();
         }
         System.out.println(flightsOut.toString());
         return flightsOut;
