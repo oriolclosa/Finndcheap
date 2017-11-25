@@ -10,19 +10,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Insta {
-
+   private ArrayList<ArrayList<String>> flightsOut = new ArrayList<>();
+   private ArrayList<String> flight;
+   private String fdate;
+   private  String fprice;
+   private  String fnoFlight;
     //Insta api which will recive querys to search
-    public ArrayList<ArrayList<String>> flyFrom(String sour, String dest, String dataexit, String dateto){
-        ArrayList<ArrayList<String>> flightsOut = new ArrayList<>();
-        ArrayList<String> flight;
-        String fdate;
-        String fprice;
-        String fnoFlight;
+
+    public ArrayList<ArrayList<String>> flyFrom(String sour, String dest, String dataexit, String dateto) {
+        boolean fixed = false;
+        return flyFromCore(sour,dest,dataexit,dateto,fixed);
+    }
+    public ArrayList<ArrayList<String>> flyFromFixed(String sour, String dest, String dataexit, String dateto) {
+        boolean fixed = true;
+        return flyFromCore(sour,dest,dataexit,dateto,fixed);
+    }
+    public ArrayList<ArrayList<String>> flyFromCore(String sour, String dest, String dataexit, String dateto,boolean fixed){
+
 
         URIBuilder urireq = new URIBuilder();
         urireq.setScheme("https");
         urireq.setHost("instantsearch-junction.ecom.finnair.com");
-        urireq.setPath("/api/instantsearch/pricesforperiod");
+        if(fixed) urireq.setPath("/api/instantsearch/pricesforperiod/fixeddeparture");
+        else urireq.setPath("/api/instantsearch/pricesforperiod");
         urireq.addParameter("departureLocationCode",sour);
         urireq.addParameter("destinationLocationCode",dest);
         urireq.addParameter("startDate",dataexit);
@@ -60,6 +70,12 @@ public class Insta {
         }
         String travels = content.toString();
 
+
+        return omaeWaMouShinderu(travels);
+
+    }
+   // https://instantsearch-junction.ecom.finnair.com/api/instantsearch/pricesforperiod?departureLocationCode=HEL&destinationLocationCode=STO&startDate=2017-12-12&numberOfDays=10
+    private ArrayList<ArrayList<String>> omaeWaMouShinderu(String travels){
         try{
             JSONObject jsonObject = new JSONObject(travels);
             if(jsonObject.has("level")){
@@ -88,11 +104,8 @@ public class Insta {
             System.out.println(e.toString());
             return null;
         }
+        System.out.println(flightsOut.toString());
         return flightsOut;
+    }
 
-    }
-   // https://instantsearch-junction.ecom.finnair.com/api/instantsearch/pricesforperiod?departureLocationCode=HEL&destinationLocationCode=STO&startDate=2017-12-12&numberOfDays=10
-    private ArrayList<ArrayList<String>> omaeWaMouShinderu(){
-    return null;
-    }
 }
