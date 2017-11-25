@@ -2,6 +2,21 @@ import java.util.*;
 
 public class FredCalor {
 
+    public boolean Fred(String place, int day){
+        Weather w = new Weather();
+        List<String> Temps = w.weatherDay(place, day);
+
+        int tempMin = Integer.parseInt(Temps.get(1));
+        int tempMax = Integer.parseInt(Temps.get(2));
+        double vent = Double.parseDouble(Temps.get(5));
+        System.out.println(place + " " + day);
+        System.out.println(temperatura(tempMin, tempMax, vent));
+        if(temperatura(tempMin, tempMax, vent).equals("It's OK")){
+            return false;
+        }
+        return true;
+    }
+
     public String FredOCalor(String place, int day){
         Weather w = new Weather();
         List<String> Temps = w.weatherDay(place, day);
@@ -80,7 +95,7 @@ public class FredCalor {
             default:
                 break;
         }
-        if (s.charAt(2) > 0) return "the sky is gonna be " + valor1 + ",\nand there will be " + valor2 + " of " + valor3 + " with an exactly value of " + pluja + "mm";
+        if (s.charAt(2) > 0) return "the sky is gonna be " + valor1 + ", and there will be " + valor2 + " of " + valor3 + " with an exactly value of " + pluja + "mm";
         else return "the sky is gonna be " + valor1 + ", and there will be " + valor2;
     }
 
