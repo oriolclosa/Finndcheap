@@ -39,30 +39,31 @@ public class Insta {
         if(fixed) urireq.setPath("/api/instantsearch/pricesforperiod/fixeddeparture");
         else urireq.setPath("/api/instantsearch/pricesforperiod");
         //extra parameters :3
+        System.out.println(more.length);
         if (more.length!=0) {
-            if (more.length>=1) {
+            if (more.length>=1 && more[0].length()!=0) {
                 if (more[0].equals("eco")) {
                     urireq.addParameter("cff", "ECONOMY1");
                 } else if (more[0].equals("bus")) {
                     urireq.addParameter("cff", "BUSINESS1");
                 }
             }
-            if (more.length>=2) {
+            if (more.length>=2&&more[1].length()!=0) {
                 if (more[1].equals("true")) {
                     urireq.addParameter("oneway", "true");
                 } else if (more[1].equals("false")) {
                     urireq.addParameter("oneway", "false");
                 }
             }
-            if (more.length>=3) {
+            if (more.length>=3&&more[2].length()!=0) {
                 if (Integer.parseInt(more[2]) >= 1 && Integer.parseInt(more[2]) <= 30)
                     urireq.addParameter("lengthOfStay", more[2]);
             }
-            if (more.length>=4) {
+            if (more.length>=4&&more[3].length()!=0) {
                 if (Integer.parseInt(more[3]) >= 0 && Integer.parseInt(more[3]) <= 30)
                     urireq.addParameter("lengthOfStay", more[3]);
             }
-            if (more.length>=5) {
+            if (more.length>=5&&more[4].length()!=0) {
                 if (more[4].equals("true")) {
                     urireq.addParameter("debug", "true");
                 } else if (more[4].equals("false")) {
@@ -72,8 +73,12 @@ public class Insta {
         }
         urireq.addParameter("departureLocationCode",sour);
         urireq.addParameter("destinationLocationCode",dest);
-        urireq.addParameter("startDate",dataexit);
+        if (!fixed)
+            urireq.addParameter("startDate",dataexit);
+        else
+            urireq.addParameter("departureDate",dataexit);
         urireq.addParameter("numberOfDays",dateto);
+
 
         //debug
         System.out.println(urireq.toString());
@@ -141,32 +146,34 @@ public class Insta {
                     fnoFlight = data.getBoolean("noFlight")? "true" : "false";
 
                     if(data.has("departureDebugInfo")){
-                        JSONObject depar = new JSONObject("departureDebugInfo");
+                        JSONObject depar = data.getJSONObject("departureDebugInfo");
+
                         if(depar.has("flightNumbers")){
-                            JSONArray fliNum = new JSONArray("flightNumbers");
+                            JSONArray fliNum = depar.getJSONArray("flightNumbers");
                             if(fliNum.length()!=0){
-                                fflightNum = fliNum.toString(0);
+                                fflightNum = fliNum.getString(0);
                             }
                         }
                         if(depar.has("fareBasis")){
-                            JSONArray farBas = new JSONArray("fareBasis");
+                            JSONArray farBas = depar.getJSONArray("fareBasis");
                             if(farBas.length()!=0){
-                                ffarBas = farBas.toString(0);
+                                ffarBas = farBas.getString(0);
                             }
                         }
                     }
+
                     if(data.has("returnDebugInfo")){
-                        JSONObject retur = new JSONObject("returnDebugInfo");
+                        JSONObject retur = data.getJSONObject("returnDebugInfo");
                         if(retur.has("flightNumbers")){
-                            JSONArray fliNumret = new JSONArray("flightNumbers");
+                            JSONArray fliNumret = retur.getJSONArray("flightNumbers");
                             if(fliNumret.length()!=0){
-                                fflightNumret = fliNumret.toString(0);
+                                fflightNumret = fliNumret.getString(0);
                             }
                         }
                         if(retur.has("fareBasis")){
-                            JSONArray farBasret = new JSONArray("fareBasis");
+                            JSONArray farBasret = retur.getJSONArray("fareBasis");
                             if(farBasret.length()!=0){
-                                ffarBasret = farBasret.toString(0);
+                                ffarBasret = farBasret.getString(0);
                             }
                         }
                     }
@@ -178,10 +185,10 @@ public class Insta {
 
         }
         catch (Exception e){
-            System.out.println(e.toString());
+
             return new ArrayList<ArrayList<String >>();
         }
-        System.out.println(flightsOut.toString());
+
         return flightsOut;
     }
 
