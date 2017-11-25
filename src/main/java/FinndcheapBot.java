@@ -11,6 +11,7 @@ import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mo
 import javax.print.Doc;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -41,7 +42,8 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                             if(Objects.equals(actual.getInteger("_id"), actual2.getInteger("user"))) {
                                 String data = actual2.getString("time");
                                 Date d1 = new SimpleDateFormat("yyyy-MM-dd").parse(data);
-                                Date d2 = new SimpleDateFormat("yyyy-MM-dd").parse("2017-11-25");
+                                Date d2 = new Date();
+                                d1.setTime(d1.getTime()+43200000);  //12 hores més
                                 long diff = Math.abs(d1.getTime() - d2.getTime());
                                 long diffDays = diff / (24 * 60 * 60 * 1000);
                                 if ((diffDays>0)&&(diffDays < 6)) {
@@ -119,6 +121,45 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         }
     }
 
+    private ArrayList<String> getDestinations(int user_id, boolean first){
+        ArrayList<String> ciutats = new ArrayList<>();
+        if(!first){
+            Weather temps = new Weather();
+            ArrayList<ArrayList<ArrayList<String>>> ciutats2 = temps.weatherAll();
+            int mida = ciutats2.size();
+            int valor = (int) (Math.random() * mida);
+            ciutats.add(ciutats2.get(valor).get(0).get(0));
+        }
+        else {
+            java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
+            MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
+            MongoClient mongoClient = new MongoClient(connectionString);
+            MongoDatabase database = mongoClient.getDatabase("finndcheap");
+            MongoCollection<Document> collection = database.getCollection("flights");
+            FindIterable<Document> values = collection.find(new Document());
+            MongoCursor<Document> cursor = values.iterator();
+            try{
+                while(cursor.hasNext()){
+                    Document actual = cursor.next();
+                    if(actual.getInteger("user")==user_id){
+                        ciutats.add(actual.getString("airA"));
+                    }
+                }
+            }
+            finally{
+                cursor.close();
+            }
+            if (ciutats.isEmpty()) {
+                Weather temps = new Weather();
+                ArrayList<ArrayList<ArrayList<String>>> ciutats2 = temps.weatherAll();
+                int mida = ciutats2.size();
+                int valor = (int) (Math.random() * mida);
+                ciutats.add(ciutats2.get(valor).get(0).get(0));
+            }
+        }
+        return ciutats;
+    }
+
     private String check(int user_id, int chat_id, String first_name, String last_name, String username) {
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
         MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
@@ -187,16 +228,49 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             if(message_text.equals("/start")){
                 sendMessage(chat_id, (check(toIntExact(user_id), toIntExact(chat_id), user_first_name, user_last_name, user_username)));
                 sendMessage(chat_id, "Here is a list of commands!\n" +
+                        "/recommend\n" +
+                        "/find (origin) (destination)\n" +
                         "/get_weather (days)\n" +
                         "/settings");
             }
             else if(message_text.equals("/add_flight")){
-                addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-26", (float)137.30, "adult", "economy");
+                addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-27", (float)137.30, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "BCN", "2017-11-25", (float)124.30, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-10-10", (float)255.67, "adult", "business");
                 addFlight(toIntExact(user_id), "HEL", "ORY", "2017-10-23", (float)75.34, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-07-10", (float)132.12, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-02-01", (float)165.70, "adult", "economy");
+            }
+            else if(message_text.equals("/recommend")){
+                Insta insta = new Insta();
+                Date date = new Date(); // your date
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                int year = cal.get(Calendar.YEAR);
+                int month = cal.get(Calendar.MONTH);
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+                String recomanacio = mediana(getDestinations(toIntExact(user_id), true));
+                System.out.println(recomanacio);
+                ArrayList<ArrayList<String>> valors = new ArrayList<>();
+                while(valors.size()<=0){
+                    recomanacio = mediana(getDestinations(toIntExact(user_id), false));
+                    if(recomanacio!="HEL"){
+                        valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
+                    }
+                }
+                sendMessage(chat_id, "Our recomendation is... " + recomanacio + "! \uD83C\uDF1A");
+                sendMessage(chat_id, "Here you have the next flights.");
+                int mida=valors.size();
+                if(mida>5){
+                    mida = 5;
+                }
+                for(int i=0; i<mida; ++i){
+                    sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
+                }
+
+            }
+            else if(message_text.equals("/find")){
+
             }
             else if(message_text.equals("/get_weather")){
                 getWeather(toIntExact(chat_id), 0);
@@ -301,7 +375,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         return "483875557:AAHc3q_N0G3jLhLR04B_EeVYgpui3ztPF8A";
     }
 
-    public String mediana(List<String> ciutats){
+    public String mediana(ArrayList<String> ciutats){
         Map<String, Integer> ciutat = new HashMap<>();
         List<String> ci = new ArrayList<>();
         String c;

@@ -9,9 +9,6 @@ import static java.lang.Math.toIntExact;
 public class Main {
     public static void main(String[] args) {
         // Initialize Api Context
-        //test purpouses muniategui
-        Insta insta = new Insta();
-        insta.flyFrom("HEL","STO","2017-12-12","10");
         //end of test  muniategui
         ApiContextInitializer.init();
 
