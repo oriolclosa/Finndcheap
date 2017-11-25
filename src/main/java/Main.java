@@ -7,8 +7,6 @@ public class Main {
         // Initialize Api Context
         ApiContextInitializer.init();
 
-        System.out.println("hola");
-
         // Instantiate Telegram Bots API
         TelegramBotsApi botsApi = new TelegramBotsApi();
 
