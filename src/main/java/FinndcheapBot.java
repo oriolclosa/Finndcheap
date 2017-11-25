@@ -321,7 +321,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 int year = cal.get(Calendar.YEAR);
                 int month = cal.get(Calendar.MONTH);
                 int day = cal.get(Calendar.DAY_OF_MONTH);
-                ArrayList<ArrayList<String>> valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "2017-11-30");
+                ArrayList<ArrayList<String>> valors = insta.flyFromFixed("HEL", opcio,  year+"-"+(month+1)+"-"+day, "5");
                 sendMessage(chat_id, "Those are the search results for " + /*ciutat(*/opcio/*)*/ + " (" + opcio + ")! \uD83C\uDF1A");
                 int mida=valors.size();
                 if(mida>5){
