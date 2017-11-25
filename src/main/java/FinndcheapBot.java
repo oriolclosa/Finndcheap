@@ -9,6 +9,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mongodb.client.MongoCollection; import com.mongodb.client.MongoDatabase; import org.bson.Document; import org.json.JSONObject;
 
 import javax.print.Doc;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -490,5 +491,47 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             default:
                 return null;
         }
+    }
+
+    public String ciutat(String code){
+        String FILENAME = "/root/Telegram/airports_codes.txt";
+        File fileIn;
+        Scanner s;
+        try {
+            fileIn = new File(FILENAME);
+            s = new Scanner(fileIn);
+        }catch (Exception e){
+            System.out.println("No connecta");
+            fileIn = null;
+            s = null;
+        }
+
+        boolean trobat = false;
+
+        while(s.hasNext() && !trobat)
+        {
+            String linia = s.nextLine();
+            StringBuilder sb = new StringBuilder(3);
+            sb.append(linia.charAt(0));
+            sb.append(linia.charAt(1));
+            sb.append(linia.charAt(2));
+            String code2 = sb.toString();
+            if (code2.equals(code)){
+                trobat = true;
+                StringBuilder ciutatBuild = new StringBuilder();
+                boolean iscoma = false;
+                int i = 5;
+                while(!iscoma){
+                    if (linia.charAt(i) == ',') iscoma = true;
+                    else {
+                        ciutatBuild.append(linia.charAt(i));
+                        ++i;
+                    }
+                }
+                return ciutatBuild.toString();
+            }
+
+        }
+        return code;
     }
 }
