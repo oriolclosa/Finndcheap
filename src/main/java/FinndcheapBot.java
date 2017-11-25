@@ -456,13 +456,15 @@ public class FinndcheapBot extends TelegramLongPollingBot {
     public String intToDate(int merdaseca) {
         switch (merdaseca) {
             case 0:
-                return "Today";
+                return "The day before tomorrow";
             case 1:
-                return "Tomorrow";
+                return "The day after today";
+            case 2:
+                return "The day after tomorrow";
+            case 3:
+                return "The day after the day after tomorrow";
             default:
-                Calendar c = Calendar.getInstance();
-                c.add(Calendar.DATE, merdaseca);
-                return c.toString();
+                return null;
         }
     }
 }
