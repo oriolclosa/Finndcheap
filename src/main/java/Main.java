@@ -4,11 +4,11 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.util.Timer;
 
-import static java.lang.Math.toIntExact;
-
 public class Main {
     public static void main(String[] args) {
         // Initialize Api Context
+        Insta a = new Insta();
+        a.flyFrom("HEL","LPA","2017-12-12","10");
         //end of test  muniategui
         ApiContextInitializer.init();
 

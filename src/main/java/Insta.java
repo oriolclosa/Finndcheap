@@ -39,36 +39,35 @@ public class Insta {
         if(fixed) urireq.setPath("/api/instantsearch/pricesforperiod/fixeddeparture");
         else urireq.setPath("/api/instantsearch/pricesforperiod");
         //extra parameters
-        if(!more[0].isEmpty()){
-            if (more[0].equals("eco")){
-                urireq.addParameter("cff","ECONOMY1");
+        if (more.length!=0) {
+            if (!more[0].isEmpty()) {
+                if (more[0].equals("eco")) {
+                    urireq.addParameter("cff", "ECONOMY1");
+                } else if (more[0].equals("bus")) {
+                    urireq.addParameter("cff", "BUSINESS1");
+                }
             }
-            else if (more[0].equals("bus")){
-                urireq.addParameter("cff","BUSINESS1");
+            if (!more[1].isEmpty()) {
+                if (more[1].equals("true")) {
+                    urireq.addParameter("oneway", "true");
+                } else if (more[1].equals("false")) {
+                    urireq.addParameter("oneway", "false");
+                }
             }
-        }
-        if(!more[1].isEmpty()){
-            if(more[1].equals("true")){
-                urireq.addParameter("oneway","true");
+            if (!more[2].isEmpty()) {
+                if (Integer.parseInt(more[2]) >= 1 && Integer.parseInt(more[2]) <= 30)
+                    urireq.addParameter("lengthOfStay", more[2]);
             }
-            else if(more[1].equals("false")){
-                urireq.addParameter("oneway","false");
+            if (!more[3].isEmpty()) {
+                if (Integer.parseInt(more[3]) >= 0 && Integer.parseInt(more[3]) <= 30)
+                    urireq.addParameter("lengthOfStay", more[3]);
             }
-        }
-        if(!more[2].isEmpty()) {
-            if(Integer.parseInt(more[2])>=1 &&Integer.parseInt(more[2])<=30)
-                    urireq.addParameter("lengthOfStay",more[2]);
-        }
-        if(!more[3].isEmpty()) {
-            if(Integer.parseInt(more[3])>=0 &&Integer.parseInt(more[3])<=30)
-                urireq.addParameter("lengthOfStay",more[3]);
-        }
-        if(!more[4].isEmpty()){
-            if(more[4].equals("true")){
-                urireq.addParameter("debug","true");
-            }
-            else if(more[4].equals("false")){
-                urireq.addParameter("debug","false");
+            if (!more[4].isEmpty()) {
+                if (more[4].equals("true")) {
+                    urireq.addParameter("debug", "true");
+                } else if (more[4].equals("false")) {
+                    urireq.addParameter("debug", "false");
+                }
             }
         }
         urireq.addParameter("departureLocationCode",sour);
