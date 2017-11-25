@@ -1,6 +1,7 @@
 import com.mongodb.DBCursor;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -8,6 +9,11 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.mongodb.MongoClient; import com.mongodb.MongoClientURI; import com.mongodb.client.MongoCollection; import com.mongodb.client.MongoDatabase; import org.bson.Document; import org.json.JSONObject;
 
 import javax.print.Doc;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Timer;
 import java.util.logging.Level;
 
 import static java.lang.Math.toIntExact;
@@ -15,7 +21,7 @@ import static jdk.nashorn.internal.objects.NativeFunction.function;
 
 public class FinndcheapBot extends TelegramLongPollingBot {
 
-    public void alertWeather(){
+    public void alertWeather(int chat_id){
         java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
         MongoClientURI connectionString = new MongoClientURI("mongodb://159.89.13.211:27017");
         MongoClient mongoClient = new MongoClient(connectionString);
@@ -25,14 +31,44 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         MongoCursor<Document> cursor = values.iterator();
         try{
             while(cursor.hasNext()){
-                if(cursor.next().getBoolean("weather")){
-                    System.out.println("CERT");
+                Document actual = cursor.next();
+                if(actual.getBoolean("weather")){
+                    MongoCollection<Document> collection2 = database.getCollection("flights");
+                    FindIterable<Document> values2 = collection2.find(new Document());
+                    MongoCursor<Document> cursor2 = values2.iterator();
+                    try{
+                        while(cursor2.hasNext()){
+                            Document actual2 = cursor2.next();
+                            if(Objects.equals(actual.getInteger("_id"), actual2.getInteger("user"))) {
+                                String data = actual2.getString("time");
+                                Date d1 = new SimpleDateFormat("yyyy-MM-dd").parse(data);
+                                Date d2 = new SimpleDateFormat("yyyy-MM-dd").parse("2017-11-25");
+                                long diff = Math.abs(d1.getTime() - d2.getTime());
+                                long diffDays = diff / (24 * 60 * 60 * 1000);
+                                if ((diffDays>0)&&(diffDays < 6)) {
+                                    String plural = "days";
+                                    if(diffDays==1){
+                                        plural = "day";
+                                    }
+                                    sendMessage(chat_id, "Warning for your flight to " + getName(actual2.getString("airD")) + " in " + diffDays + " " + plural + "! ☔");
+                                }
+                            }
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    } finally{
+                        cursor2.close();
+                    }
                 }
             }
         }
         finally{
             cursor.close();
         }
+    }
+
+    private String getName(String codi){
+        return codi;
     }
 
     private void setVariable(int user_id, String variable, String value){
@@ -116,16 +152,15 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         MongoClient mongoClient = new MongoClient(connectionString);
         MongoDatabase database = mongoClient.getDatabase("finndcheap");
         MongoCollection<Document> collection = database.getCollection("flights");
-        System.out.println("AFEGIT1");
-        Document doc = new Document("_id", Document.parse("{id: " + user_id + ", time: " + time + "}"))
+        Document doc = new Document("user", user_id)
                 .append("airD", airD)
                 .append("airA", airA)
+                .append("time", time)
                 .append("price", price)
                 .append("type", type)
                 .append("cabin", cabin);
         collection.insertOne(doc);
         mongoClient.close();
-        System.out.println("AFEGIT2");
     }
 
     @Override
@@ -146,6 +181,18 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 sendMessage(chat_id, "Here is a list of commands!\n" +
                         "/get_weather (days)\n" +
                         "/settings");
+            }
+            else if(message_text.equals("/run_weather")){
+                Timer timer = new Timer();
+                timer.schedule(new AlertWeather(this, toIntExact(chat_id)), 0, 5000);
+            }
+            else if(message_text.equals("/add_flight")){
+                addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-26", (float)137.30, "adult", "economy");
+                addFlight(toIntExact(user_id), "HEL", "BCN", "2017-11-25", (float)124.30, "adult", "economy");
+                addFlight(toIntExact(user_id), "HEL", "CDG", "2017-10-10", (float)255.67, "adult", "business");
+                addFlight(toIntExact(user_id), "HEL", "ORY", "2017-10-23", (float)75.34, "adult", "economy");
+                addFlight(toIntExact(user_id), "HEL", "CDG", "2017-07-10", (float)132.12, "adult", "economy");
+                addFlight(toIntExact(user_id), "HEL", "CDG", "2017-02-01", (float)165.70, "adult", "economy");
             }
             else if(message_text.equals("/get_weather")){
                 getWeather(toIntExact(chat_id), 0);
@@ -214,16 +261,6 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             else if((message_text.length()>0)&&(message_text.charAt(0)==('/'))){
                 sendMessage(chat_id, "I'm sorry, I don't understand this command... \uD83D\uDE30");
             }
-
-            //ONLY FOR DEVELOPMENT \/
-            else if(message_text.equals("/run_weather")){
-                alertWeather();
-            }
-            else if(message_text.equals("/add_flight")){
-                addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-25", (float)124.30, "adult", "economy");
-            }
-            //ONLY FOR DEVELOPMENT /\
-
             else{
                 sendError(toIntExact(chat_id));
             }
