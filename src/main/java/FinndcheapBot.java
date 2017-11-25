@@ -78,9 +78,11 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             mongoClient.close();
             inicial = "Welcome back " + first_name + "! ✈";
         }
-        return inicial+"\n\n" +
-                "Here is a list of commands!\n" +
-                "/settings";
+        return inicial;
+    }
+
+    private void getWeather(int chat_id, int days){
+        sendMessage(chat_id, "Weather for " + days + "!");
     }
 
     @Override
@@ -98,11 +100,37 @@ public class FinndcheapBot extends TelegramLongPollingBot {
 
             if(message_text.equals("/start")){
                 sendMessage(chat_id, (check(toIntExact(user_id), user_first_name, user_last_name, user_username)));
+                sendMessage(chat_id, "Here is a list of commands!\n" +
+                        "/get_weather (days)\n" +
+                        "/settings");
+            }
+            else if(message_text.equals("/get_weather")){
+                getWeather(toIntExact(chat_id), 0);
+            }
+            else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/get_weather"))){
+                String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
+                if(opcio.equals("1")) {
+                    getWeather(toIntExact(chat_id), 1);
+                }
+                else if(opcio.equals("2")) {
+                    getWeather(toIntExact(chat_id), 2);
+                }
+                else if(opcio.equals("3")) {
+                    getWeather(toIntExact(chat_id), 3);
+                }
+                else if(opcio.equals("4")) {
+                    getWeather(toIntExact(chat_id), 4);
+                }
+                else{
+                    sendError(toIntExact(chat_id));
+                }
             }
             else if(message_text.equals("/settings")){
                 sendMessage(chat_id, "You can customise the following options... \uD83D\uDD28");
-                sendMessage(chat_id, "/settings_weather (yes/no) ⛅\n" +
-                        "If you have any flight, it will alert you of any bad weather!");
+                sendMessage(chat_id, "/settings_weather ⛅\n" +
+                        "Turn it on: /settings_weather_yes\n" +
+                        "Turn it off: /settings_weather_no\n" +
+                        "If you have any flight, it will alert you of any bad weather!\n");
             }
             else if(message_text.equals("/settings_weather")){
                 if(getVariable(toIntExact(user_id), "weather").equals("yes")){
@@ -136,15 +164,22 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                     sendMessage(chat_id, "You won't get any bad weather notifications for your flights... \uD83D\uDE14\n" +
                             "You can turn this on by typing /settings_weather_yes.");
                 }
+                else{
+                    sendError(toIntExact(chat_id));
+                }
             }
             else if((message_text.length()>0)&&(message_text.charAt(0)==('/'))){
                 sendMessage(chat_id, "I'm sorry, I don't understand this command... \uD83D\uDE30");
             }
             else{
                 System.out.println(message_text);
-                sendMessage(chat_id, "I'm sorry, I don't understand what you are saying... \uD83D\uDE33");
+                sendError(toIntExact(chat_id));
             }
         }
+    }
+
+    private void sendError(int chat_id){
+        sendMessage(chat_id, "I'm sorry, I don't understand what you are saying... \uD83D\uDE33");
     }
 
     private void sendMessage(long chat_id, String message_text){
