@@ -24,8 +24,5 @@ public class Main {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-
-        Timer timer = new Timer();
-        timer.schedule(new AlertWeather(bot), 0, 5000);
     }
 }
