@@ -369,6 +369,10 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 setVariable(""+toIntExact(user_id),"users","weather", "no");
                 sendMessage(chat_id, "NANI?");
             }
+            else if (message_text.equals("Send nudes")){
+                setVariable(""+toIntExact(user_id),"users","weather", "no");
+                sendMessage(chat_id, "(.)(.)");
+            }
             else if((message_text.contains(" "))&&((message_text.substring(0, message_text.indexOf(" "))).equals("/settings_weather"))){
                 String opcio = message_text.substring(message_text.indexOf(" ")+1, message_text.length());
                 if(opcio.equals("yes")){
