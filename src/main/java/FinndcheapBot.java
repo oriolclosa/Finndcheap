@@ -46,14 +46,19 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                                 d1.setTime(d1.getTime()+43200000);  //12 hores més
                                 long diff = Math.abs(d1.getTime() - d2.getTime());
                                 long diffDays = diff / (24 * 60 * 60 * 1000);
-                                if ((diffDays>0)&&(diffDays < 6)) {
+                                if ((diffDays>0)&&(diffDays < 5)) {
                                     if(actual2.getInteger("reminded")!=diffDays){
                                         setVariable(actual2.getObjectId("_id").toString(), "flights","reminded", ""+diffDays);
                                         String plural = "days";
                                         if(diffDays==1){
                                             plural = "day";
                                         }
-                                        sendMessage(chat_id, "Warning for your flight to " + getName(actual2.getString("airD")) + " in " + diffDays + " " + plural + "! ☔");
+                                        FredCalor temps = new FredCalor();
+                                        System.out.println((temps.Fred(actual2.getString("airA"), (int)diffDays)));
+                                        if(temps.Fred(actual2.getString("airA"), (int)diffDays)) {
+                                            sendMessage(chat_id, "Warning for your flight to " + getName(actual2.getString("airA")) + " in " + diffDays + " " + plural + "! ☔");
+                                            sendMessage(chat_id, temps.FredOCalor(actual2.getString("airA"), (int)diffDays));
+                                        }
                                     }
                                 }
                             }
@@ -266,6 +271,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 listCommands(toIntExact(chat_id));
             }
             else if(message_text.equals("/add_flight")){
+                addFlight(toIntExact(user_id), "BCN", "DUB", "2017-11-30", (float)137.30, "adult", "economy");
                 addFlight(toIntExact(user_id), "BCN", "HEL", "2017-11-27", (float)137.30, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "BCN", "2017-11-25", (float)124.30, "adult", "economy");
                 addFlight(toIntExact(user_id), "HEL", "CDG", "2017-10-10", (float)255.67, "adult", "business");
@@ -284,6 +290,9 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 String recomanacio = mediana(getDestinations(toIntExact(user_id), true));
                 System.out.println(recomanacio);
                 ArrayList<ArrayList<String>> valors = new ArrayList<>();
+                if(recomanacio!="HEL"){
+                    valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
+                }
                 while(valors.size()<=0){
                     recomanacio = mediana(getDestinations(toIntExact(user_id), false));
                     if(recomanacio!="HEL"){
