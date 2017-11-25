@@ -428,9 +428,13 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         Map<String, Integer> ciutat = new HashMap<>();
         List<String> ci = new ArrayList<>();
         String c;
+        String onelast = null;
+        String secondlast = null;
+        String thirdlast = null;
         for (int i = 0; i < ciutats.size(); ++i){
             c = ciutats.get(i);
             Integer count = ciutat.get(c);
+            if (i == 0) onelast = secondlast = thirdlast = c;
             if (count == null){
                 ciutat.put(c, 1);
                 ci.add(c);
@@ -438,7 +442,14 @@ public class FinndcheapBot extends TelegramLongPollingBot {
             else{
                 ciutat.put(c, ++count);
             }
+            thirdlast = secondlast;
+            secondlast = onelast;
+            onelast = c;
         }
+
+        ciutat.put(thirdlast, ciutat.get(thirdlast) + 1);
+        ciutat.put(secondlast, ciutat.get(secondlast) + 2);
+        ciutat.put(onelast, ciutat.get(onelast) + 3);
 
         Iterator it = ciutat.entrySet().iterator();
 
