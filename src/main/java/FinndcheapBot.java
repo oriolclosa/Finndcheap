@@ -300,7 +300,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                         valors = insta.flyFrom("HEL", recomanacio,  year+"-"+(month+1)+"-"+day, "10");
                     }
                 }
-                sendMessage(chat_id, "Our recomendation is... " + recomanacio + " (" + recomanacio + ")! \uD83C\uDF1A");
+                sendMessage(chat_id, "Our recomendation is... " + /*ciutat(*/recomanacio/*)*/ + " (" + recomanacio + ")! \uD83C\uDF1A");
                 sendMessage(chat_id, "Here you have the next flights.");
                 int mida=valors.size();
                 if(mida>5){
@@ -309,6 +309,7 @@ public class FinndcheapBot extends TelegramLongPollingBot {
                 for(int i=0; i<mida; ++i){
                     sendMessage(chat_id, valors.get(i).get(0) + " for " + valors.get(0).get(1) + "€");
                 }
+                sendMessage(chat_id, "Do you prefer another place? /recommend \uD83D\uDEA9");
 
             }
             else if(message_text.equals("/find")){
