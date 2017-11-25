@@ -416,4 +416,17 @@ public class FinndcheapBot extends TelegramLongPollingBot {
         }
         return ciu;
     }
+
+    public String intToDate(int merdaseca) {
+        switch (merdaseca) {
+            case 0:
+                return "Today";
+            case 1:
+                return "Tomorrow";
+            default:
+                Calendar c = Calendar.getInstance();
+                c.add(Calendar.DATE, merdaseca);
+                return c.toString();
+        }
+    }
 }
