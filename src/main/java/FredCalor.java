@@ -1,20 +1,11 @@
 import java.util.*;
 
-public class cosa {
+public class FredCalor {
 
+    public String FredOCalor(String place, int day){
+        Weather w = new Weather();
+        List<String> Temps = w.weatherDay(place, day);
 
-    public static void main (String[] args){
-        cosa c = new cosa();
-        List<String> temps = new ArrayList<>();
-        Scanner s = new Scanner(System.in);
-        for (int i = 0; i < 7; ++i){
-            temps.add(s.nextLine());
-        }
-        System.out.println(c.FredOCalor(temps));
-    }
-
-    public String FredOCalor(List<String> Temps){
-        String dia = Temps.get(0);
         int tempMin = Integer.parseInt(Temps.get(1));
         int tempMax = Integer.parseInt(Temps.get(2));
         String s = Temps.get(3);
