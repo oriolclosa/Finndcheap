@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Abbre {
 
-    private static final String FILENAME = "C:\\Users\\Oriol\\Dropbox\\Universidad\\haks\\Finndcheap\\src\\main\\java\\airports_codes.txt";
+    private static final String FILENAME = "/root/Telegram/airports_codes.txt";
 
     public static void main (String[] args){
         Abbre a = new Abbre();
